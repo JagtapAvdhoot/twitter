@@ -1,5 +1,4 @@
 const httpStatus = require("http-status");
-const { randomUUID } = require("crypto");
 
 const asyncHandler = require("../middleware/asyncHandler");
 const models = require("../model");
@@ -7,6 +6,7 @@ const { sendErrorResponse, sendSuccessResponse } = require("../util/response");
 const { Op } = require("sequelize");
 const { uploadFilesToCloudinary } = require("../util/cloudinary");
 const { audience } = require("../util/audience");
+const createUUID = require("../util/uuid");
 
 const { User, Tweet } = models;
 
@@ -37,7 +37,7 @@ exports.createTweet = asyncHandler(async (req, res) => {
     }
 
     const newTweet = await Tweet.create({
-        id: randomUUID(),
+        id: createUUID(),
         desc,
         replyingTo,
         audience,

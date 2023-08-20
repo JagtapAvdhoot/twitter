@@ -1,6 +1,5 @@
 const { hashSync, compareSync } = require("bcrypt");
 const { series } = require("async");
-const { randomUUID } = require("crypto");
 const { Op } = require("sequelize");
 
 const models = require("../model");
@@ -13,6 +12,7 @@ const {
 } = require("../validator/user.validator");
 const { sendErrorResponse, sendSuccessResponse } = require("../util/response");
 const { signToken } = require("../util/jwt");
+const createUUID = require("../util/uuid");
 
 const { User } = models;
 
@@ -29,14 +29,12 @@ exports.register = asyncHandler(async (req, res) => {
     const newPassword = hashSync(password, 13);
 
     const createUser = await User.create({
-        id: randomUUID(),
+        id: createUUID(),
         username,
         email,
         fullName,
         password: newPassword,
     });
-
-    await createUser.save();
 
     const token = signToken({ id: createUser.id });
 

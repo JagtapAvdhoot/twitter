@@ -38,6 +38,10 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.ARRAY(DataTypes.JSONB),
                 defaultValue: [],
             },
+            tweetReplies: {
+                type: DataTypes.ARRAY(DataTypes.JSONB),
+                defaultValue: [],
+            },
             tweetReports: {
                 type: DataTypes.ARRAY(DataTypes.JSONB),
                 defaultValue: [],
