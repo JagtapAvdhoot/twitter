@@ -17,6 +17,7 @@ export const followUser: RequestHandler<{}, {}, {}, IReqQuery> = async (
   const user = req.user;
 
   if (!uid) return next(new createError(400, ""));
+  if (!user) return next(new createError(401, ""));
 
   try {
     const signedUser = await findUser({
@@ -97,6 +98,7 @@ export const getUsers: RequestHandler<{}, {}, {}, IReqQuery> = async (
 
 export const getUserAvatar: RequestHandler = async (req, res, next) => {
   const user = req.user;
+  if (!user) return next(new createError(401, ""));
 
   try {
     const avatar = await findUser({ identifier: user._id, select: "avatar" });
@@ -113,9 +115,10 @@ export const getFollower: RequestHandler<{}, {}, {}, IReqQuery> = async (
   next
 ) => {
   const { uid } = req.query;
-  const user = req.user;
+  if (!uid) return next(new createError(401, ""));
 
   try {
+    // just here
   } catch (error) {
     next(error);
   }
