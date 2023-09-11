@@ -5,7 +5,7 @@ yarn.lock
 .env.local
 .env.development
 
-*.md
+old/*.md
 
 old
 build
