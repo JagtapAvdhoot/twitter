@@ -1,0 +1,20 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components{
+    .auth-white-btn{
+        @apply rounded-full w-full bg-white text-black font-bold py-2
+    }
+    .auth-btn{
+        @apply rounded-full w-full font-bold py-2
+    }
+    .theme{
+        @apply bg-theme-light_bg dark:bg-theme-dark_bg text-theme-light_text dark:text-theme-dark_text
+    }
+}
+
+body{
+    font-family: "Montserrat",'Courier New', Courier, monospace;
+}
