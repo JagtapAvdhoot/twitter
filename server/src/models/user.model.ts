@@ -21,6 +21,7 @@ export interface IUser extends Document {
   password: string;
   bio: string;
   website: string;
+  avatar: string;
   followers: IUserWithTime[];
   followings: IUserWithTime[];
   reports: IReport[];
@@ -49,9 +50,9 @@ const userSchema = new Schema<IUser>(
     },
     bio: String,
     website: String,
-    avatar:{
-      type:String,
-      default: 
+    avatar: {
+      type: String,
+      default: "",
     },
 
     followers: [],
