@@ -1,5 +1,6 @@
 import {
   FilterQuery,
+  QueryOptions,
   SortOrder,
   UpdateQuery,
   UpdateWithAggregationPipeline,
@@ -34,6 +35,7 @@ interface IFindUser {
     | [string, SortOrder][]
     | null
     | undefined;
+  skip?: number;
 }
 
 export const findUser = async ({
@@ -41,25 +43,21 @@ export const findUser = async ({
   select = "-__v -updatedAt",
   limit = 1,
   sort = "asc",
+  skip = 0,
 }: IFindUser) => {
   return await User.find({
     $or: [{ username: identifier }, { email: identifier }, { _id: identifier }],
   })
     .select(select)
-    .limit(limit)
-    .sort(sort);
+    .sort(sort)
+    .skip(skip)
+    .limit(limit);
 };
 
 export const updateUser = async (
-  _id: string,
-  what: UpdateQuery<IUser> | UpdateWithAggregationPipeline
+  filter: FilterQuery<IUser>,
+  update: UpdateQuery<IUser> | UpdateWithAggregationPipeline,
+  options: QueryOptions<IUser> | null | undefined = {}
 ) => {
-  return await User.updateOne(
-    {
-      _id,
-    },
-    {
-      what,
-    }
-  );
+  return await User.updateOne(filter, update, options);
 };
