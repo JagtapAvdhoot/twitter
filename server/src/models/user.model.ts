@@ -15,7 +15,7 @@ interface ITweetCreate {
 }
 
 export interface IUser extends Document {
-  _id:string;
+  _id: string;
   username: string;
   email: string;
   fullName: string;

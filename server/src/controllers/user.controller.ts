@@ -1,8 +1,10 @@
 import { RequestHandler } from "express";
+import { Types } from "mongoose";
 import { findUser, updateUser } from "../services/user.service";
 import { sendSuccessResponse } from "../utils/response";
 import createError from "../middleware/createError";
 import httpStatus from "http-status";
+import { findTweet } from "../services/tweet.service";
 
 interface IReqQuery {
   uid?: string;
@@ -144,9 +146,9 @@ export const setUserAvatar: RequestHandler<{}, {}, ISetUserAvatar> = async (
   if (!user) return next(new createError(httpStatus.UNAUTHORIZED, ""));
 
   try {
-    await updateUser({ _id: user._id }, { $set: { avatar:_avatar } });
+    await updateUser({ _id: user._id }, { $set: { avatar: _avatar } });
 
-    sendSuccessResponse({res})
+    sendSuccessResponse({ res })
   } catch (error) {
     next(error);
   }
@@ -162,6 +164,9 @@ export const getFollower: RequestHandler<{}, {}, {}, IReqQuery> = async (
 
   try {
     // just here
+    const follower = await findUser({ identifier: uid, select: "followers" });
+
+    sendSuccessResponse({ res, data: { follower: follower[0].followers } })
   } catch (error) {
     next(error);
   }
@@ -172,9 +177,12 @@ export const getFollowing: RequestHandler<{}, {}, {}, IReqQuery> = async (
   next
 ) => {
   const { uid } = req.query;
-  const user = req.user;
+  if (!uid) return next(new createError(httpStatus.BAD_REQUEST, ""));
 
   try {
+    const following = await findUser({ identifier: uid, select: "followings" })
+
+    sendSuccessResponse({ res, data: { following: following[0].followings } });
   } catch (error) {
     next(error);
   }
@@ -184,10 +192,25 @@ export const getUserLiked: RequestHandler<{}, {}, {}, IReqQuery> = async (
   res,
   next
 ) => {
-  const { uid } = req.query;
   const user = req.user;
 
+  if (!user) return next(new createError(httpStatus.UNAUTHORIZED, ""));
+
   try {
+    const signedUser = await findUser({ identifier: user._id, select: "tweetLiked" });
+
+    const tweetIds = signedUser[0].tweetLiked.map((likes) => new Types.ObjectId(likes.user));
+
+    const tweet = await findTweet(
+      {
+        identifier: {
+          _id: {
+            $in: tweetIds
+          }
+        }, limit: 20, select: "desc media location _id"
+      });
+
+    sendSuccessResponse({ res, data: { tweet } })
   } catch (error) {
     next(error);
   }

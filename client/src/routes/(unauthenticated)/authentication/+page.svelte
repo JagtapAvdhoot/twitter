@@ -52,10 +52,7 @@
 				<Button class="auth-btn bg-theme-blue mt-3 mb-2 text-sm">
 					<!-- svelte-ignore a11y-no-static-element-interactions -->
 					<!-- svelte-ignore a11y-click-events-have-key-events -->
-					<span
-						on:click={toggleModel}
-						slot="name">Create account</span
-					>
+					<span on:click={toggleModel} slot="name">Create account</span>
 				</Button>
 
 				<span class="w-full leading-3 text-theme-dark_text_secondary text-[9px]">
