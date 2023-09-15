@@ -26,11 +26,11 @@ export const followUser: RequestHandler<{}, {}, {}, IReqQuery> = async (
 
   try {
     const signedUser = await findUser({
-      identifier: user._id,
+      identifier: { _id: user._id },
       select: "followers",
     });
     const followingUser = await findUser({
-      identifier: uid,
+      identifier: { _id: uid },
       select: "followings",
     });
 
@@ -79,7 +79,7 @@ export const getUser: RequestHandler<{}, {}, {}, IReqQuery> = async (
 
   try {
     const user = await findUser({
-      identifier: uid,
+      identifier: { _id: uid },
       select: "username fullName email _id",
     });
 
@@ -98,10 +98,15 @@ export const getUsers: RequestHandler<{}, {}, {}, IReqQuery> = async (
 ) => {
   const { search, offset } = req.query;
   if (!search) return next(new createError(httpStatus.BAD_REQUEST, ""));
-
+  const searchRegex = new RegExp(search);
   try {
     const user = await findUser({
-      identifier: search,
+      identifier: {
+        $or: [
+          { username: searchRegex },
+          { fullName: searchRegex }
+        ]
+      },
       select: "username fullName email _id",
       limit: 10,
       skip: Number(offset) ?? 0,
@@ -124,7 +129,7 @@ export const getUserAvatar: RequestHandler<{}, {}, {}, IReqQuery> = async (
   if (!uid) return next(new createError(httpStatus.BAD_REQUEST, ""));
 
   try {
-    const avatar = await findUser({ identifier: uid, select: "avatar" });
+    const avatar = await findUser({ identifier: { _id: uid }, select: "avatar" });
 
     sendSuccessResponse({ res, data: { avatar: avatar[0].avatar } });
   } catch (error) {
@@ -163,8 +168,9 @@ export const getFollower: RequestHandler<{}, {}, {}, IReqQuery> = async (
   if (!uid) return next(new createError(401, ""));
 
   try {
-    // just here
-    const follower = await findUser({ identifier: uid, select: "followers" });
+    const follower = await findUser({ identifier: { _id: uid }, select: "followers" });
+
+    if (!follower) return next(new createError(httpStatus.NO_CONTENT, ""));
 
     sendSuccessResponse({ res, data: { follower: follower[0].followers } })
   } catch (error) {
@@ -180,7 +186,9 @@ export const getFollowing: RequestHandler<{}, {}, {}, IReqQuery> = async (
   if (!uid) return next(new createError(httpStatus.BAD_REQUEST, ""));
 
   try {
-    const following = await findUser({ identifier: uid, select: "followings" })
+    const following = await findUser({ identifier: { _id: uid }, select: "followings" })
+
+    if (!following) return next(new createError(httpStatus.NO_CONTENT, ""));
 
     sendSuccessResponse({ res, data: { following: following[0].followings } });
   } catch (error) {
@@ -197,7 +205,7 @@ export const getUserLiked: RequestHandler<{}, {}, {}, IReqQuery> = async (
   if (!user) return next(new createError(httpStatus.UNAUTHORIZED, ""));
 
   try {
-    const signedUser = await findUser({ identifier: user._id, select: "tweetLiked" });
+    const signedUser = await findUser({ identifier: { _id: user._id }, select: "tweetLiked" });
 
     const tweetIds = signedUser[0].tweetLiked.map((likes) => new Types.ObjectId(likes.user));
 

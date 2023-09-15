@@ -1,7 +1,0 @@
-{
-  "rules": {
-    "semi": ["warm", "always"],
-    "quotes": ["warn", "double"]
-  },
-  "extends": "eslint:recommended"
-}

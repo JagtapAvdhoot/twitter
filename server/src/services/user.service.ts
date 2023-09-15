@@ -20,21 +20,21 @@ export const createUser = async (
 };
 
 interface IFindUser {
-  identifier: string;
+  identifier: FilterQuery<IUser>;
   select?: string | string[] | Record<string, number | boolean | object>;
   limit?: number;
   sort?:
-    | string
+  | string
+  | {
+    [key: string]:
+    | SortOrder
     | {
-        [key: string]:
-          | SortOrder
-          | {
-              $meta: any;
-            };
-      }
-    | [string, SortOrder][]
-    | null
-    | undefined;
+      $meta: any;
+    };
+  }
+  | [string, SortOrder][]
+  | null
+  | undefined;
   skip?: number;
 }
 
@@ -45,9 +45,7 @@ export const findUser = async ({
   sort = "asc",
   skip = 0,
 }: IFindUser) => {
-  return await User.find({
-    $or: [{ username: identifier }, { email: identifier }, { _id: identifier }],
-  })
+  return await User.find(identifier)
     .select(select)
     .sort(sort)
     .skip(skip)
