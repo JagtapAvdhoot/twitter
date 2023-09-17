@@ -14,24 +14,28 @@ interface IMedia {
   secure_url: string;
   public_id: string;
   index: number;
+  type: string;
 }
 interface IReplies {
   tweetId: string;
   time: Date;
 }
-
 export interface ITweet extends Document {
   _id: string;
   desc: string;
   author: string;
   location: string;
   replyingTo: string;
+  audiance: "everyone" | "circle";
+  whoCanReply: "everyone" | "peopleFollowed" | "peopleMentioned";
+  schedule: Date;
   replies: IReplies[];
   media: IMedia[];
   reports: IReport[];
   likes: IUserWithTime[];
   bookmarks: IUserWithTime[];
   views: number;
+  isDraft: Boolean;
 }
 
 
@@ -46,6 +50,16 @@ const tweetSchema = new Schema<ITweet>(
       required: true,
     },
     location: String,
+    isDraft: {
+      type: Boolean,
+      default: false
+    },
+    schedule: {
+      type: Date,
+      default: Date.now()
+    },
+    audiance: String,
+    whoCanReply: String,
 
     replyingTo: String,
     replies: [],

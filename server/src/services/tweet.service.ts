@@ -1,4 +1,4 @@
-import { FilterQuery, SortOrder } from "mongoose";
+import { FilterQuery, QueryOptions, SortOrder, UpdateQuery, UpdateWithAggregationPipeline } from "mongoose";
 import Tweet, { ITweet } from "../models/tweet.model";
 
 interface IFindTweet {
@@ -29,4 +29,12 @@ export const findTweet = async ({ identifier, select = "-__v -updatedAt", sort =
     .select(select);
 }
 
-export const updateTweet = async () => { };
+interface ITweetUpdate {
+  filter: FilterQuery<ITweet>;
+  update: UpdateWithAggregationPipeline | UpdateQuery<ITweet> | undefined;
+  options?: QueryOptions<ITweet>;
+}
+
+export const updateTweet = async ({ filter, update, options = {} }: ITweetUpdate) => {
+  return await Tweet.updateOne(filter, update, options)
+};
