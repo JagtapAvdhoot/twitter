@@ -31,6 +31,8 @@ export interface IUser extends Document {
   tweetBookmarked: IUserWithTime[];
   tweetCreated: ITweetCreate[];
   notifications: [];
+  accountId: string;
+  provider: string;
 }
 
 const userSchema = new Schema<IUser>(
@@ -45,15 +47,18 @@ const userSchema = new Schema<IUser>(
       required: true,
       unique: true,
     },
-    password: {
-      type: String,
-      required: true,
-    },
+    password: String,
     bio: String,
     website: String,
     avatar: {
       type: String,
       default: "",
+    },
+    // oauth
+    provider: String,
+    accountId: {
+      type: String,
+      unique: true
     },
 
     followers: [],

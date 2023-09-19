@@ -13,6 +13,7 @@ import { comparePassword, hashPassword } from "../utils/bcrypt";
 import { signJWT } from "../utils/jwt";
 import { sendSuccessResponse } from "../utils/response";
 import { createUser, findUser } from "../services/user.service";
+import { tryEach } from "async";
 
 const signInSchema = z.object({
   usernameOrEmail: z.string(),
@@ -37,7 +38,12 @@ export const signIn: RequestHandler<{}, any, ISignInBody> = async (
 
   try {
     const user = await findUser({
-      identifier: usernameOrEmail,
+      identifier: {
+        $or: [
+          { username: usernameOrEmail },
+          { email: usernameOrEmail }
+        ]
+      },
       select: "password _id",
     });
 
@@ -88,7 +94,7 @@ export const register: RequestHandler<{}, {}, IRegister> = async (
   // validations
 
   try {
-    const newUser = await createUser(username, email, fullName, _password);
+    const newUser = await createUser({ username, email, fullName, password: _password });
 
     const token = signJWT({ _id: newUser._id });
 
@@ -115,5 +121,16 @@ export const resetPassword: RequestHandler = async (req, res, next) => {
 
 // TODO: create two more routes of google sign in and apple id sign in
 
-export const signUpWithGoogle: RequestHandler = async (req, res, next) => {};
-export const signUpWithApple: RequestHandler = async (req, res, next) => {};
+export const signUpWithGoogle: RequestHandler = async (req, res, next) => {
+
+
+  try {
+
+  } catch (error) {
+    next(error)
+  }
+};
+
+
+export const signUpWithTwitter: RequestHandler = async (req, res, next) => { };
+export const signUpWithGithub: RequestHandler = async (req, res, next) => { };

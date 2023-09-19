@@ -9,12 +9,13 @@ import {
 import User, { IUser } from "../models/user.model";
 
 export const createUser = async (
-  username: string,
-  email: string,
-  fullName: string,
-  password: string
+  // username: string,
+  // email: string,
+  // fullName: string,
+  // password: string
+  body: Partial<IUser>
 ) => {
-  const newUser = new User({ username, email, fullName, password });
+  const newUser = new User({ username: body.username, email: body.email, fullName: body.fullName, password: body.password });
 
   return await newUser.save();
 };

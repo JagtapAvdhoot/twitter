@@ -1,11 +1,12 @@
 import { RequestHandler } from "express";
 import { sendSuccessResponse } from "../utils/response";
-import { findTweet } from "../services/tweet.service";
+import { findTweet, newTweet } from "../services/tweet.service";
 import { findUser } from "../services/user.service";
 import createError from "../middleware/createError";
 import httpStatus from "http-status";
 import { Types } from "mongoose";
 import { z } from "zod";
+import { uploadFile } from "../utils/cloudinary";
 
 interface IOffsetAndLimit {
   offset: number;
@@ -59,8 +60,8 @@ interface ICreateTweet {
 
 const createTweetSchema = z.object({
   media: z.array(z.string()),
-  desc:z.string(),
-  audiance:z.string(),
+  desc: z.string(),
+  audiance: z.string(),
   whoCanReply: z.string(),
   location: z.string()
 })
@@ -72,11 +73,15 @@ export const createTweet: RequestHandler<{}, {}, ICreateTweet> = async (req, res
 
   if (Array.isArray(media) && media?.length > 1) {
     try {
-      for (let _file of media) {
-        await uploadFile(_file, options)
-      }
+      const [res, error] = await uploadFile(media, options)
     } catch (error) {
       next(error);
     }
+  }
+
+  try {
+    const tweet = await newTweet({ media: res, desc, audiance, whoCanReply, location })
+  } catch (error) {
+    next(error);
   }
 }

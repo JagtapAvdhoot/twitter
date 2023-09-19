@@ -9,7 +9,7 @@ interface IReport {
   time: Date;
   message: string;
 }
-interface IMedia {
+export interface IMedia {
   url: string;
   secure_url: string;
   public_id: string;
@@ -37,7 +37,6 @@ export interface ITweet extends Document {
   views: number;
   isDraft: Boolean;
 }
-
 
 const tweetSchema = new Schema<ITweet>(
   {
