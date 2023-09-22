@@ -2,17 +2,15 @@ require("dotenv").config();
 import express from "express";
 import helmet from 'helmet';
 import cors from 'cors';
-import csrf from 'csrf';
+// import csrf from 'csrf';
 import morgan from 'morgan';
 import compression from 'compression';
 import sessions from 'express-session';
 
 import ConnectToDatabase from "./configs/db";
-
 import routes from "./routes";
 import notFoundHandler from "./handlers/notFound";
 import errorHandler from "./handlers/errorHandler";
-import { session } from "passport";
 
 ConnectToDatabase();
 
@@ -30,7 +28,6 @@ app.use(sessions({
   saveUninitialized: false,
   resave: false
 }))
-
 
 app.use("/api", routes);
 

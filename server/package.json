@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/passport-google-oauth20": "^2.0.11",
     "async": "^3.2.4",
     "bcrypt": "^5.1.1",
     "cloudinary": "^1.40.0",
@@ -29,7 +30,7 @@
     "morgan": "^1.10.0",
     "passport": "^0.6.0",
     "passport-github": "^1.1.0",
-    "passport-google-oauth": "^2.0.0",
+    "passport-google-oauth20": "^2.0.0",
     "passport-twitter": "^1.0.4",
     "validator": "^13.11.0",
     "zod": "^3.22.2"
@@ -46,7 +47,6 @@
     "@types/node": "^20.6.0",
     "@types/passport": "^1.0.12",
     "@types/passport-github": "^1.1.8",
-    "@types/passport-google-oauth": "^1.0.42",
     "@types/passport-twitter": "^1.0.37",
     "@types/validator": "^13.11.1",
     "ts-node-dev": "^2.0.0",

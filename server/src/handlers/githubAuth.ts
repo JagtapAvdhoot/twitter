@@ -8,7 +8,7 @@ const authStrategy = githubPassport.Strategy;
 passport.use(new authStrategy({
   clientID: process.env.GITHUB_CLIENT_ID!,
   clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-  callbackURL: "http://127.0.0.1:5000/api/authentication/oauth/github"
+  callbackURL: process.env.GITHUB_CALLBACK_URL!
 }, async (accessToken, refreshToken, profile, cb) => {
   try {
     const user = await findUser({

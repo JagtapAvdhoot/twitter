@@ -53,10 +53,16 @@ export const findUser = async ({
     .limit(limit);
 };
 
-export const updateUser = async (
-  filter: FilterQuery<IUser>,
-  update: UpdateQuery<IUser> | UpdateWithAggregationPipeline,
-  options: QueryOptions<IUser> | null | undefined = {}
-) => {
+interface IUpdateUser {
+  filter: FilterQuery<IUser>;
+  update: UpdateQuery<IUser> | UpdateWithAggregationPipeline;
+  options: QueryOptions<IUser> | null | undefined;
+}
+
+export const updateUser = async ({
+  filter,
+  update,
+  options = {},
+}: IUpdateUser) => {
   return await User.updateOne(filter, update, options);
 };

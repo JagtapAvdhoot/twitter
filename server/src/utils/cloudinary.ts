@@ -14,13 +14,23 @@ const destroyFunction = v2.uploader.destroy;
 function uploadSingleFile(
   file: string,
   options: UploadApiOptions,
-  callback: ResponseCallback,
+  callback: ResponseCallback
 ) {
-  uploadFunction(file, options, callback);
+  return new Promise((resolve, reject) => {
+    uploadFunction(file, options, (err, response) => {
+      if (err) {
+        reject(callback(err, null));
+      } else {
+        resolve(callback(null, response));
+      }
+    });
+  });
 }
 
-// code sucks
-export async function uploadFile(files: string[], options: UploadApiOptions) {
+export async function uploadFile(
+  files: string[],
+  options: UploadApiOptions
+): Promise<[Error | unknown | null, IMedia[] | null]> {
   const uploads: IMedia[] = [];
   try {
     if (Array.isArray(files) && files.length > 0) {
@@ -37,22 +47,10 @@ export async function uploadFile(files: string[], options: UploadApiOptions) {
           });
         });
       }
-
-      const uploadPromises = files.map((_file, _index) => uploadSingleFile(_file, options, (error, res) => {
-        if (error) throw error;
-
-        uploads.push({
-          secure_url: res.secure_url,
-          url: res.url,
-          type: res.type,
-          public_id: res.public_id,
-          index: _index,
-        });
-      }))
     }
-    return [uploads, null];
+    return [null, uploads];
   } catch (error) {
-    return [null, error];
+    return [error, null];
   }
 }
 
@@ -62,9 +60,9 @@ export async function removeFile(files: IMedia[]) {
       for (let _file of files) {
         await destroyFunction(_file.public_id);
       }
-      return [true, null];
+      return [null, true];
     }
   } catch (error) {
-    return [null, error];
+    return [error, null];
   }
 }
