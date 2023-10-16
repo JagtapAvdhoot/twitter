@@ -2,7 +2,11 @@ import { ErrorRequestHandler } from "express";
 import { sendErrorResponse } from "../utils/response";
 
 const errorHandler: ErrorRequestHandler = (error, req, res, next) => {
-  console.log(error);
+  console.log(
+    "\n**************************************************************",
+    error,
+    "\n**************************************************************"
+  );
 
   return sendErrorResponse({
     res,

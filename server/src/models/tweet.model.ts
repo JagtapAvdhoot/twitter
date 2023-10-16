@@ -26,7 +26,7 @@ export interface ITweet extends Document {
   author: string;
   location: string;
   replyingTo: string;
-  audiance: "everyone" | "circle";
+  audience: "everyone" | "circle";
   whoCanReply: "everyone" | "peopleFollowed" | "peopleMentioned";
   schedule: Date;
   replies: IReplies[];
@@ -51,13 +51,13 @@ const tweetSchema = new Schema<ITweet>(
     location: String,
     isDraft: {
       type: Boolean,
-      default: false
+      default: false,
     },
     schedule: {
       type: Date,
-      default: Date.now()
+      default: Date.now(),
     },
-    audiance: String,
+    audience: String,
     whoCanReply: String,
 
     replyingTo: String,

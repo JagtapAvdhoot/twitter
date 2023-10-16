@@ -9,7 +9,7 @@ import Tweet, { IMedia, ITweet } from "../models/tweet.model";
 import { IUser } from "../models/user.model";
 
 interface IFindTweet {
-  identifier: FilterQuery<ITweet>;
+  filter: FilterQuery<ITweet>;
   select?: string | string[] | Record<string, number | boolean | object>;
   limit?: number;
   sort?:
@@ -28,13 +28,13 @@ interface IFindTweet {
 }
 
 export const findTweet = async ({
-  identifier,
+  filter,
   select = "-__v -updatedAt",
   sort = "asc",
   skip = 0,
   limit = 1,
-}: IFindTweet) => {
-  return await Tweet.find(identifier)
+}: IFindTweet): Promise<ITweet[]> => {
+  return await Tweet.find(filter)
     .skip(skip)
     .sort(sort)
     .limit(limit)
@@ -61,7 +61,7 @@ interface ICreateTweet {
   media?: IMedia[] | [];
   replyingTo?: string;
   isDraft?: boolean;
-  audiance?: string;
+  audience?: string;
   whoCanReply?: string;
   location?: string;
 }
@@ -71,7 +71,7 @@ export const newTweet = async ({
   replyingTo = "",
   author,
   isDraft = false,
-  audiance = "everyone",
+  audience = "everyone",
   whoCanReply = "everyone",
   desc,
   location = "",
@@ -83,9 +83,16 @@ export const newTweet = async ({
     author,
     isDraft,
     replyingTo,
-    audiance,
+    audience,
     whoCanReply,
   });
 
   return await newTweet.save();
+};
+
+export const removeTweet = async (
+  id: string,
+  options?: QueryOptions<ITweet> & { lean: true }
+) => {
+  return await Tweet.findByIdAndDelete(id, options);
 };

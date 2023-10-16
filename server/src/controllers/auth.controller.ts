@@ -32,17 +32,16 @@ export const signIn: RequestHandler<{}, any, ISignInBody> = async (
   res,
   next
 ) => {
-  const { usernameOrEmail, password, remember } = await signInSchema.parseAsync(req.body);
+  const { usernameOrEmail, password, remember } = await signInSchema.parseAsync(
+    req.body
+  );
 
   if (!usernameOrEmail || !password) return next(new createError(400, ""));
 
   try {
     const user = await findUser({
-      identifier: {
-        $or: [
-          { username: usernameOrEmail },
-          { email: usernameOrEmail }
-        ]
+      filter: {
+        $or: [{ username: usernameOrEmail }, { email: usernameOrEmail }],
       },
       select: "password _id",
     });
@@ -84,7 +83,8 @@ export const register: RequestHandler<{}, {}, IRegister> = async (
   res,
   next
 ) => {
-  const { email, fullName, password, username, remember } = await signUpSchema.parseAsync(req.body);
+  const { email, fullName, password, username, remember } =
+    await signUpSchema.parseAsync(req.body);
 
   if (!username || !password || !fullName || !email)
     return next(new createError(400, ""));
@@ -94,7 +94,12 @@ export const register: RequestHandler<{}, {}, IRegister> = async (
   // validations
 
   try {
-    const newUser = await createUser({ username, email, fullName, password: _password });
+    const newUser = await createUser({
+      username,
+      email,
+      fullName,
+      password: _password,
+    });
 
     const token = signJWT({ _id: newUser._id });
 
@@ -119,18 +124,15 @@ export const resetPassword: RequestHandler = async (req, res, next) => {
   }
 };
 
-// TODO: create two more routes of google sign in and apple id sign in
+// TODO: create two routes of google, twitter, github sign in and sign up
 
 export const signUpWithGoogle: RequestHandler = async (req, res, next) => {
-
-
   try {
 
   } catch (error) {
-    next(error)
+    next(error);
   }
 };
 
-
-export const signUpWithTwitter: RequestHandler = async (req, res, next) => { };
-export const signUpWithGithub: RequestHandler = async (req, res, next) => { };
+export const signUpWithTwitter: RequestHandler = async (req, res, next) => {};
+export const signUpWithGithub: RequestHandler = async (req, res, next) => {};

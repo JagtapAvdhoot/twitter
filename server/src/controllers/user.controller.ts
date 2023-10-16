@@ -26,11 +26,11 @@ export const followUser: RequestHandler<{}, {}, {}, IReqQuery> = async (
 
   try {
     const signedUser = await findUser({
-      identifier: { _id: user._id },
+      filter: { _id: user._id },
       select: "followers",
     });
     const followingUser = await findUser({
-      identifier: { _id: uid },
+      filter: { _id: uid },
       select: "followings",
     });
 
@@ -42,23 +42,23 @@ export const followUser: RequestHandler<{}, {}, {}, IReqQuery> = async (
     );
 
     if (isFollowed !== -1 || isFollowing !== -1) {
-      await updateUser(
-        { _id: user._id },
-        { $pull: { followers: { user: uid } } }
-      );
-      await updateUser(
-        { _id: uid },
-        { $pull: { followings: { user: user._id } } }
-      );
+      await updateUser({
+        filter: { _id: user._id },
+        update: { $pull: { followers: { user: uid } } },
+      });
+      await updateUser({
+        filter: { _id: uid },
+        update: { $pull: { followings: { user: user._id } } },
+      });
     } else if (isFollowed === -1 || isFollowing === -1) {
-      await updateUser(
-        { _id: user._id },
-        { $push: { followers: { user: uid } } }
-      );
-      await updateUser(
-        { _id: uid },
-        { $push: { followings: { user: user._id } } }
-      );
+      await updateUser({
+        filter: { _id: user._id },
+        update: { $push: { followers: { user: uid } } },
+      });
+      await updateUser({
+        filter: { _id: uid },
+        update: { $push: { followings: { user: user._id } } },
+      });
     } else {
       // throw error
     }
@@ -79,7 +79,7 @@ export const getUser: RequestHandler<{}, {}, {}, IReqQuery> = async (
 
   try {
     const user = await findUser({
-      identifier: { _id: uid },
+      filter: { _id: uid },
       select: "username fullName email _id",
     });
 
@@ -101,11 +101,8 @@ export const getUsers: RequestHandler<{}, {}, {}, IReqQuery> = async (
   const searchRegex = new RegExp(search);
   try {
     const user = await findUser({
-      identifier: {
-        $or: [
-          { username: searchRegex },
-          { fullName: searchRegex }
-        ]
+      filter: {
+        $or: [{ username: searchRegex }, { fullName: searchRegex }],
       },
       select: "username fullName email _id",
       limit: 10,
@@ -129,7 +126,10 @@ export const getUserAvatar: RequestHandler<{}, {}, {}, IReqQuery> = async (
   if (!uid) return next(new createError(httpStatus.BAD_REQUEST, ""));
 
   try {
-    const avatar = await findUser({ identifier: { _id: uid }, select: "avatar" });
+    const avatar = await findUser({
+      filter: { _id: uid },
+      select: "avatar",
+    });
 
     sendSuccessResponse({ res, data: { avatar: avatar[0].avatar } });
   } catch (error) {
@@ -151,9 +151,12 @@ export const setUserAvatar: RequestHandler<{}, {}, ISetUserAvatar> = async (
   if (!user) return next(new createError(httpStatus.UNAUTHORIZED, ""));
 
   try {
-    await updateUser({ _id: user._id }, { $set: { avatar: _avatar } });
+    await updateUser({
+      filter: { _id: user._id },
+      update: { $set: { avatar: _avatar } },
+    });
 
-    sendSuccessResponse({ res })
+    sendSuccessResponse({ res });
   } catch (error) {
     next(error);
   }
@@ -168,11 +171,14 @@ export const getFollower: RequestHandler<{}, {}, {}, IReqQuery> = async (
   if (!uid) return next(new createError(401, ""));
 
   try {
-    const follower = await findUser({ identifier: { _id: uid }, select: "followers" });
+    const follower = await findUser({
+      filter: { _id: uid },
+      select: "followers",
+    });
 
     if (!follower) return next(new createError(httpStatus.NO_CONTENT, ""));
 
-    sendSuccessResponse({ res, data: { follower: follower[0].followers } })
+    sendSuccessResponse({ res, data: { follower: follower[0].followers } });
   } catch (error) {
     next(error);
   }
@@ -186,7 +192,10 @@ export const getFollowing: RequestHandler<{}, {}, {}, IReqQuery> = async (
   if (!uid) return next(new createError(httpStatus.BAD_REQUEST, ""));
 
   try {
-    const following = await findUser({ identifier: { _id: uid }, select: "followings" })
+    const following = await findUser({
+      filter: { _id: uid },
+      select: "followings",
+    });
 
     if (!following) return next(new createError(httpStatus.NO_CONTENT, ""));
 
@@ -205,25 +214,31 @@ export const getUserLiked: RequestHandler<{}, {}, {}, IReqQuery> = async (
   if (!user) return next(new createError(httpStatus.UNAUTHORIZED, ""));
 
   try {
-    const signedUser = await findUser({ identifier: { _id: user._id }, select: "tweetLiked" });
+    const signedUser = await findUser({
+      filter: { _id: user._id },
+      select: "tweetLiked",
+    });
 
-    const tweetIds = signedUser[0].tweetLiked.map((likes) => new Types.ObjectId(likes.user));
+    const tweetIds = signedUser[0].tweetLiked.map(
+      (likes) => new Types.ObjectId(likes.user)
+    );
 
-    const tweet = await findTweet(
-      {
-        identifier: {
-          _id: {
-            $in: tweetIds
-          }
-        }, limit: 20, select: "desc media location _id"
-      });
+    const tweet = await findTweet({
+      filter: {
+        _id: {
+          $in: tweetIds,
+        },
+      },
+      limit: 20,
+      select: "desc media location _id",
+    });
 
-    sendSuccessResponse({ res, data: { tweet } })
+    sendSuccessResponse({ res, data: { tweet } });
   } catch (error) {
     next(error);
   }
 };
-export const getUserSaved: RequestHandler<{}, {}, {}, IReqQuery> = async (
+export const getUserBookmarked: RequestHandler<{}, {}, {}, IReqQuery> = async (
   req,
   res,
   next
@@ -232,6 +247,26 @@ export const getUserSaved: RequestHandler<{}, {}, {}, IReqQuery> = async (
   const user = req.user;
 
   try {
+    const signedUser = await findUser({
+      filter: { _id: user._id },
+      select: "tweetBookmarked",
+    });
+
+    const tweetIds = signedUser[0].tweetBookmarked.map(
+      (bookmark) => new Types.ObjectId(bookmark.user)
+    );
+
+    const tweet = await findTweet({
+      filter: {
+        _id: {
+          $in: tweetIds,
+        },
+      },
+      limit: 20,
+      select: "desc media location _id",
+    });
+
+    sendSuccessResponse({ res, data: { tweet } });
   } catch (error) {
     next(error);
   }
@@ -241,10 +276,23 @@ export const getSuggestedUser: RequestHandler<{}, {}, {}, IReqQuery> = async (
   res,
   next
 ) => {
-  const { uid } = req.query;
   const user = req.user;
+  let recentFollowers = [];
 
   try {
+    const followers = await findUser({
+      filter: {
+        _id: user._id,
+      },
+      select: "followers",
+    });
+
+    recentFollowers = followers[0].followers.map((item, index) => {
+      if (index > 3) return;
+      return item.user;
+    });
+
+    // const
   } catch (error) {
     next(error);
   }

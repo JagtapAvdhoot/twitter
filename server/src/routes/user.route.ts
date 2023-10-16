@@ -1,6 +1,17 @@
 import { Router } from "express";
 
-import { getUser, getUsers, followUser, getFollower, getFollowing, getUserLiked, getUserSaved, getUserAvatar, setUserAvatar, getSuggestedUser } from "../controllers/user.controller";
+import {
+  getUser,
+  getUsers,
+  followUser,
+  getFollower,
+  getFollowing,
+  getUserLiked,
+  getUserBookmarked,
+  getUserAvatar,
+  setUserAvatar,
+  getSuggestedUser,
+} from "../controllers/user.controller";
 import { requireSignIn } from "../middleware/requireSignIn";
 
 const userRouter = Router();
@@ -11,7 +22,7 @@ userRouter.get("/follow", requireSignIn, followUser);
 userRouter.get("/follower", getFollower);
 userRouter.get("/following", getFollowing);
 userRouter.get("/liked", requireSignIn, getUserLiked);
-userRouter.get("/saved", requireSignIn, getUserSaved);
+userRouter.get("/saved", requireSignIn, getUserBookmarked);
 userRouter.get("/avatar", getUserAvatar);
 userRouter.get("/suggestion", getSuggestedUser);
 

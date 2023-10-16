@@ -12,6 +12,12 @@ export const authStore = writable({
 });
 
 export const appStore = writable({
-	theme: browser ? localStorage.getItem(twitter_clone_theme_name) ?? 'light' : 'light',
-	accent: browser ? localStorage.getItem(twitter_clone_accent_name) ?? 'blue' : 'blue'
+	theme:
+		browser && localStorage.getItem(twitter_clone_theme_name)
+			? localStorage.getItem(twitter_clone_theme_name)
+			: 'dark',
+	accent:
+		browser && localStorage.getItem(twitter_clone_accent_name)
+			? localStorage.getItem(twitter_clone_accent_name)
+			: 'blue'
 });

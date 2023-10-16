@@ -9,7 +9,7 @@ interface IReport {
   time: Date;
   message: string;
 }
-interface ITweetCreate {
+interface ITweetWithTime {
   tweet: string;
   time: Date;
 }
@@ -26,10 +26,13 @@ export interface IUser extends Document {
   followers: IUserWithTime[];
   followings: IUserWithTime[];
   reports: IReport[];
-  list: [];
+  list: {
+    user: string[];
+  }[];
   tweetLiked: IUserWithTime[];
   tweetBookmarked: IUserWithTime[];
-  tweetCreated: ITweetCreate[];
+  tweetCreated: ITweetWithTime[];
+  tweetPinned: ITweetWithTime[];
   notifications: [];
   accountId: string;
   provider: string;
@@ -58,7 +61,7 @@ const userSchema = new Schema<IUser>(
     provider: String,
     accountId: {
       type: String,
-      unique: true
+      unique: true,
     },
 
     followers: [],

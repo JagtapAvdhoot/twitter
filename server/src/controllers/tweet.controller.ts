@@ -4,8 +4,13 @@ import { Types } from "mongoose";
 import { z } from "zod";
 
 import { sendSuccessResponse } from "../utils/response";
-import { findTweet, newTweet } from "../services/tweet.service";
-import { findUser } from "../services/user.service";
+import {
+  findTweet,
+  newTweet,
+  removeTweet,
+  updateTweet,
+} from "../services/tweet.service";
+import { findUser, updateUser } from "../services/user.service";
 import createError from "../middleware/createError";
 import { uploadFile } from "../utils/cloudinary";
 import { IMedia } from "../models/tweet.model";
@@ -26,7 +31,7 @@ export const globalFeed: RequestHandler<{}, {}, {}, IOffsetAndLimit> = async (
 
   try {
     const tweet = await findTweet({
-      identifier: {},
+      filter: {},
       select: "_id",
       limit: _limit,
       skip: _offset,
@@ -48,7 +53,7 @@ export const userFeed: RequestHandler = async (req, res, next) => {
   if (!signedUser) return next(new createError(httpStatus.UNAUTHORIZED, ""));
   try {
     const user = await findUser({
-      identifier: { _id: signedUser._id },
+      filter: { _id: signedUser._id },
       select: "followers",
     });
 
@@ -59,7 +64,7 @@ export const userFeed: RequestHandler = async (req, res, next) => {
     );
 
     const tweet = await findTweet({
-      identifier: { _id: { $in: followers } },
+      filter: { author: { $in: followers } },
       select: "_id",
       limit: _limit,
       skip: _offset,
@@ -75,7 +80,7 @@ export const userFeed: RequestHandler = async (req, res, next) => {
 interface ICreateTweet {
   media: Record<string, string>[];
   desc: string;
-  audiance: string;
+  audience: string;
   whoCanReply: string;
   location: string;
 }
@@ -83,7 +88,7 @@ interface ICreateTweet {
 const createTweetSchema = z.object({
   media: z.array(z.string()).optional(),
   desc: z.string().optional(),
-  audiance: z.string().optional(),
+  audience: z.string().optional(),
   whoCanReply: z.string().optional(),
   location: z.string().optional(),
 });
@@ -93,7 +98,7 @@ export const createTweet: RequestHandler<{}, {}, ICreateTweet> = async (
   res,
   next
 ) => {
-  const { media, desc, audiance, whoCanReply, location } =
+  const { media, desc, audience, whoCanReply, location } =
     await createTweetSchema.parseAsync(req.body);
 
   let _media: IMedia[] | [] = [];
@@ -118,11 +123,127 @@ export const createTweet: RequestHandler<{}, {}, ICreateTweet> = async (
     const tweet = await newTweet({
       media: _media,
       desc,
-      audiance,
+      audience,
       whoCanReply,
       location,
       author: signedUser._id,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+interface ITweetIdInQuery {
+  tid: string;
+}
+
+export const deleteTweet: RequestHandler<{}, {}, {}, ITweetIdInQuery> = async (
+  req,
+  res,
+  next
+) => {
+  const { tid } = req.query;
+  const signedUser = req.user;
+
+  try {
+    const user = await findUser({
+      filter: { _id: signedUser._id },
+      select: "tweetCreated _id",
+    });
+
+    const tweet = await findTweet({
+      filter: { _id: tid },
+      select: "author _id",
+    });
+
+    if (tweet[0].author.toString() !== user[0]._id.toString())
+      return next(
+        new createError(httpStatus.FORBIDDEN, "you are not the author")
+      );
+
+    if (
+      user[0].tweetCreated.findIndex((tweets) => tweets.tweet === tweet[0]._id)
+    )
+      return next(new createError(httpStatus.FORBIDDEN, "not the author"));
+
+    await removeTweet(tweet[0]._id);
+
+    sendSuccessResponse({ res });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const pinTweet: RequestHandler<{}, {}, {}, ITweetIdInQuery> = async (
+  req,
+  res,
+  next
+) => {
+  const { tid } = req.query;
+  const signedUser = req.user;
+  try {
+    const pinnedArray = await findUser({
+      filter: { _id: signedUser._id },
+      select: "tweetPinned",
+    });
+
+    const isPinned = pinnedArray[0].tweetPinned.findIndex(
+      (item) => item.tweet.toString() === tid.toString()
+    );
+
+    if (isPinned !== -1) {
+      await updateUser({
+        filter: { _id: signedUser._id },
+        update: {
+          $pull: {
+            tweetPinned: {
+              tweet: tid,
+            },
+          },
+        },
+      });
+    } else {
+      await updateUser({
+        filter: { _id: signedUser._id },
+        update: {
+          $push: {
+            tweetPinned: {
+              tweet: tid,
+              time: Date.now(),
+            },
+          },
+        },
+      });
+    }
+
+    sendSuccessResponse({ res });
+  } catch (error) {
+    next(error);
+  }
+};
+
+interface IMessageInBody {
+  message: string;
+}
+
+export const reportTweet: RequestHandler<{}, {}, IMessageInBody, ITweetIdInQuery> = async (req, res, next) => {
+  const {tid} = req.query;
+  const {message} = req.body;
+  const signedUser = req.user;
+
+  try {
+    const update = await updateTweet({
+      filter:{
+        _id:tid
+      },
+      update:{
+        $addToSet:{
+          reports: {
+
+          }
+        }
+      }
+    })
   } catch (error) {
     next(error);
   }

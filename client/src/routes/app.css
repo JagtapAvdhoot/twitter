@@ -1,20 +1,31 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer components{
-    .auth-white-btn{
-        @apply rounded-full w-full bg-white text-black font-bold py-2
-    }
-    .auth-btn{
-        @apply rounded-full w-full font-bold py-2
-    }
-    .theme{
-        @apply bg-theme-light_bg dark:bg-theme-dark_bg text-theme-light_text dark:text-theme-dark_text
-    }
+@layer components {
+	.auth-white-btn {
+		@apply rounded-full w-full bg-white text-black font-bold py-2;
+	}
+	.auth-btn {
+		@apply rounded-full w-full font-bold py-2;
+	}
+	.theme {
+		@apply bg-theme-light_bg dark:bg-theme-dark_bg text-theme-light_text dark:text-theme-dark_text fill-theme-light_text dark:fill-theme-dark_text;
+	}
+	.bg {
+		@apply bg-theme-light_bg dark:bg-theme-dark_bg;
+	}
+	.text {
+		@apply text-theme-light_text dark:text-theme-dark_text;
+	}
+	.border-1 {
+		@apply border border-theme-light_border dark:border-theme-dark_border;
+	}
+	.input {
+		@apply w-full h-full outline-none border-none;
+	}
 }
 
-body{
-    font-family: "Montserrat",'Courier New', Courier, monospace;
+body {
+	font-family: 'Montserrat', 'Courier New', Courier, monospace;
 }
